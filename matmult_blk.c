@@ -15,11 +15,11 @@ void matmult_blk(int m,int n,int k,double *A,double *B,double *C, int bs) {
 
   for (i1 = 0; i1<m; i1+=bs) {
 
-  	for (i2 = i1; i2 < min(m, i2+bs); i2++) {
+  	for (i2 = i1; i2 < min(m, i1+bs); i2++) {
 
 	    for (j1 = 0; j1<n; j1+=bs) {
 
-	    	for (j2 = j1; j2 < min(n, j2+bs); j2++) {
+	    	for (j2 = j1; j2 < min(n, j1+bs); j2++) {
 
           c(i2,j2) = 0;
 
