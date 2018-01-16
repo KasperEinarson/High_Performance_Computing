@@ -1,0 +1,15 @@
+The program "assignment2" takes 4 arguments:
+
+assignment2 N max_iter tolerance type
+
+Where:
+ N is problem size (NxN)
+ max_iter is max number of iterations
+ tolerance is used as a stopping criterium along with max_iter
+ type is the function to call:
+    1: Jacobi sequential
+    2: Gauss-Seidel sequential
+    3: Jacobi parallel
+    4: Jacobi sequential (analytical)
+    5: Gauss-Seidel sequential (analytical)
+   

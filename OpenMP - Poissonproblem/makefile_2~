@@ -1,0 +1,22 @@
+CC = suncc
+OPT = -g -fast -xvpara -xopenmp -xloopinfo
+WARN = -Wall
+CFLAGS = $(OPT) $(WARN) # the C compiler flags
+OBJECTS = main.o jacobi.o gauss_seidel.o jacobi_omp.o jacobi_analytical.o gauss_seidel_analytical.o
+
+assignment2 : $(OBJECTS)
+	$(CC) $(CFLAGS) -o assignment2 $(OBJECTS)
+
+clean:
+	@rm -f *.o core
+
+realclean : clean
+	@rm -f assignment2
+
+# file dependecies
+main.o : main.c jacobi.h gauss_seidel.h jacobi_omp.h jacobi_analytical.o gauss_seidel_analytical.o
+jacobi.o : jacobi.c jacobi.h
+gauss_seidel.o : gauss_seidel.c gauss_seidel.h
+jacobi_omp.o: jacobi_omp.c jacobi_omp.h
+jacobi_analytical.o: jacobi_analytical.c jacobi_analytical.h
+gauss_seidel_analytical.o : gauss_seidel_analytical.c gauss_seidel_analytical.h
