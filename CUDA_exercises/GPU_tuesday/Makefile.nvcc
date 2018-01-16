@@ -1,0 +1,33 @@
+TARGET = matmult_gpu
+SRCS	 = main.cu matmult_gpu.cu matmult_gpu.h
+OBJS	 = main.o matmult_gpu.o
+
+OPT	= -g -O3
+PIC	=
+XOPTS = -Xptxas=-v
+ARCH  = -arch=sm_70
+OMP   = -fopenmp
+
+CXX	= nvcc
+CXXFLAGS= --compiler-options "$(OPT) $(PIC) $(OMP)" $(ARCH) $(XOPTS)
+
+CUDA_PATH ?= /appl/cuda/9.1
+INCLUDES = -I$(CUDA_PATH)/include -I$(CUDA_PATH)/samples/common/inc
+
+SOFLAGS =
+XLIBS	=
+
+$(TARGET): $(OBJS)
+	$(CXX) -o $@ $(CXXFLAGS) $(SOFLAGS) $(INCLUDES) $^ $(XLIBS)
+
+.SUFFIXES: .cu
+.cu.o:
+	$(CXX) -o $*.o -c $*.cu $(CXXFLAGS) $(SOFLAGS) $(INCLUDES)
+
+clean:
+	@/bin/rm -f $(TARGET) $(OBJS)
+
+# dependencies
+#
+main.o  : main.cu matmult_gpu.h
+matmult_gpu.o : matmult_gpu.cu
