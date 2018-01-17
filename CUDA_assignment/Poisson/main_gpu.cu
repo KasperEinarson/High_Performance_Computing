@@ -22,7 +22,7 @@ void print_F(int m, int n, int *mat);
 
 int main(int argc, char *argv[]) {
 
-	int max_it, N, *h_fu, *d_fu;
+	int max_it, N, *h_fu, *d_fu, type;
 	double *h_U, *h_U_old, *d_U, *d_U_old, *tmp;
 
     int i, j, k = 0;
@@ -30,6 +30,8 @@ int main(int argc, char *argv[]) {
 
 	N = atoi(argv[1]);
 	max_it = atoi(argv[2]);
+	type = atoi(argv[3]);
+
 
 	double delta = 2/((double)N - 1.0), delta_sq = delta * delta;
 
@@ -80,33 +82,64 @@ int main(int argc, char *argv[]) {
 
 	//print_matrix(N,N,h_U_old);
 
+	if(type == 1){
+
 	dim3 dimBlock(1,1,1);
 	dim3 dimGrid(1,1,1);
 
+	cudaMemcpy(d_U,     h_U,     size_double, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_U_old, h_U_old, size_double, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_fu,    h_fu,    size_int,    cudaMemcpyHostToDevice);
+
 	while (k < max_it) {
+
+    	jacobi_1<<<dimGrid,dimBlock>>>(N, d_U, d_U_old, d_fu, h, delta_sq);
+    	cudaDeviceSynchronize();
+
+    	//Swap Pointers	
+    	tmp = d_U;
+    	d_U = d_U_old;
+    	d_U_old = tmp;
+
+		k++;
+
+	}
+
+    cudaMemcpy(h_U,     d_U,     size_double, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_U_old, d_U_old, size_double, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_fu,    d_fu,    size_int,    cudaMemcpyDeviceToHost);
+
+
+} else if (type == 2){
+
+		dim3 dimBlock(16, 16, 1); // Num threads
+    	dim3 dimGrid(ceil((double)N/dimBlock.x), ceil((double)N/dimBlock.y), 1); // Num blocks
 
 		cudaMemcpy(d_U,     h_U,     size_double, cudaMemcpyHostToDevice);
     	cudaMemcpy(d_U_old, h_U_old, size_double, cudaMemcpyHostToDevice);
     	cudaMemcpy(d_fu,    h_fu,    size_int,    cudaMemcpyHostToDevice);
 
-   
-    	jacobi<<<dimGrid,dimBlock>>>(N, d_U, d_U_old, d_fu, h, delta_sq);
-    	cudaDeviceSynchronize();
+    	while (k < max_it) {
+
+	    	jacobi_2<<<dimGrid,dimBlock>>>(N, d_U, d_U_old, d_fu, h, delta_sq);
+	    	cudaDeviceSynchronize();
+
+	    	//Swap Pointers	
+	    	tmp = d_U;
+	    	d_U = d_U_old;
+	    	d_U_old = tmp;
+
+			k++;
+
+    	}
 
     	cudaMemcpy(h_U,     d_U,     size_double, cudaMemcpyDeviceToHost);
     	cudaMemcpy(h_U_old, d_U_old, size_double, cudaMemcpyDeviceToHost);
     	cudaMemcpy(h_fu,    d_fu,    size_int,    cudaMemcpyDeviceToHost);
 
-    	//Swap Pointers	
-    	tmp = h_U;
-    	h_U = h_U_old;
-    	h_U_old = tmp;
-
-		k++;
 	}
 
-
-	//print_matrix(N,N,h_U);
+	print_matrix(N,N,h_U);
 
 	cudaFreeHost(h_U);
 	cudaFreeHost(h_U_old);

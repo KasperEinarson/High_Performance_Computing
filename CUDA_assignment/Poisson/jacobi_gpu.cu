@@ -8,15 +8,9 @@
 #define f(i,j) F[(i)*N + (j)]
 
 
-__global__ void jacobi(int N, double *U, double *U_old, int *F, double h, double delta_sq) { 
+__global__ void jacobi_1(int N, double *U, double *U_old, int *F, double h, double delta_sq) { 
 
     int i,j;
-
-    //j = blockIdx.x * blockDim.x + threadIdx.x;
-    //i = blockIdx.y * blockDim.y + threadIdx.y;
-
-    //u(i,j) = h * (u_old(i-1,j) + u_old(i+1,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j));
-
 
     // Update U
     for (i=1; i<N-1; i++) {
@@ -27,6 +21,22 @@ __global__ void jacobi(int N, double *U, double *U_old, int *F, double h, double
 
 }
 
+__global__ void jacobi_2(int N, double *U, double *U_old, int *F, double h, double delta_sq) { 
+
+  int i, j;
+
+
+    j = blockIdx.x * blockDim.x + threadIdx.x + 1;
+    i = blockIdx.y * blockDim.y + threadIdx.y + 1;
+
+    if(i < N-1 && j < N-1){
+
+    u(i,j) = h * (u_old(i-1,j) + u_old(i+1,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j));
+
+    }
+    //Swap Pointers 
+
+}
 
   /* int i, j, k = 0;
   double h = 1.0 / 4.0;
