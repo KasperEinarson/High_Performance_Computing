@@ -17,7 +17,7 @@ void jacobi_gpu(int N, int max_it, double *U, double *U_old, int *F) {
   double *tmp;
 
   #pragma omp parallel firstprivate(k,U,U_old) private(i,j,tmp) \
-    shared(N, max_it, tol, F, h, delta, delta_sq)
+    shared(N, max_it, F, h, delta, delta_sq)
   {
 
   // Initialize U and U_old

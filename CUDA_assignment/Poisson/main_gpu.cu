@@ -19,13 +19,14 @@ void init_U_true(int N, double *U);
 
 int main(int argc, char *argv[]) {
 
-	int max_it, N, typ, *fu;
-	double tol, *U, *U_old, *f_analytical, *U_true;
+	int max_it, N, *fu;
+	double *U, *U_old, *f_analytical, *U_true;
 
 	N = atoi(argv[1]);
 	max_it = atoi(argv[2]);
-	tol = atof(argv[3]);
-	typ = atoi(argv[4]);
+
+	printf("%d", N);
+	printf("%d", max_it);
 
 	U = (double *)malloc(N * N * sizeof(double));
 	U_old = (double *)malloc(N * N * sizeof(double));
@@ -42,8 +43,8 @@ int main(int argc, char *argv[]) {
 	init_F_analytical(N, f_analytical);
 	init_U_true(N, U_true);
 
-	jacobi_omp(N, max_it, U, U_old, fu);
-	//print_matrix(N,N,U);
+	jacobi_gpu(N, max_it, U, U_old, fu);
+	print_matrix(N,N,U);
 
 	free(U);
 	free(U_old);

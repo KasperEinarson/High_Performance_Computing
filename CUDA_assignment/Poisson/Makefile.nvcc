@@ -1,6 +1,6 @@
 TARGET = poisson_gpu
-SRCS	 = main_gpu.cu mjacobi_gpu.cu jacobi_gpu.h
-OBJS	 = main_gpu.o poisson_gpu.o
+SRCS	 = main_gpu.cu jacobi_gpu.cu jacobi_gpu.h
+OBJS	 = main_gpu.o jacobi_gpu.o
 
 OPT	= -g -O3
 PIC	=
