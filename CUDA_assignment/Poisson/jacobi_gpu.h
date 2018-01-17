@@ -1,6 +1,6 @@
-#ifndef __JACOBI_GPU_H
-#define __JACOBI_GPU_H
+#ifndef __JACOBI_H
+#define __JACOBI_H
 
-void jacobi_gpu(int N, int max_it, double * U, double *U_old, int * F);
+__global__ void jacobi(int N, double *U, double *U_old, int *F, double h, double delta_sq);
 
 #endif
