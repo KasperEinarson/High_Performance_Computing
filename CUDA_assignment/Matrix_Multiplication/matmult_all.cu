@@ -207,7 +207,7 @@ void matmult_gpu4(int m, int n, int k,double *h_A,double *h_B,double *h_C) {
     cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
 
     dim3 dimBlock(16, 16, 1); // Num threads
-    dim3 dimGrid((ceil((double)n/dimBlock.x)), ceil(((double)m/dimBlock.y) / 16), 1); // Num blocks
+    dim3 dimGrid((ceil((double)n/dimBlock.x)), ceil(((double)m/dimBlock.y) / num_el), 1); // Num blocks
 
     cudaMemset(d_C, 0, size_C);
 
@@ -225,8 +225,6 @@ void matmult_gpu4(int m, int n, int k,double *h_A,double *h_B,double *h_C) {
 __global__ void matmult4(int m, int n, int k,double *A,double *B,double *C) {
 
     int i,j,l,s;
-
-    int num_el = 16;
 
     j = blockIdx.x * blockDim.x + threadIdx.x;
     i = (blockIdx.y * blockDim.y + threadIdx.y) * num_el;
@@ -257,7 +255,6 @@ __global__ void matmult4(int m, int n, int k,double *A,double *B,double *C) {
 }
 
 
-/*
 void matmult_gpu5(int m, int n, int k,double *h_A,double *h_B,double *h_C) {
 
     double  *d_A, *d_B, *d_C;
@@ -273,11 +270,11 @@ void matmult_gpu5(int m, int n, int k,double *h_A,double *h_B,double *h_C) {
     cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
 
     dim3 dimBlock(16, 16, 1); // Num threads
-    dim3 dimGrid((ceil((double)n/dimBlock.x)), ceil(((double)m/dimBlock.y) / num_el), 1); // Num blocks
+    dim3 dimGrid((ceil((double)n/dimBlock.x)), ceil(((double)m/dimBlock.y)), 1); // Num blocks
 
     cudaMemset(d_C, 0, size_C);
 
-    matmult4<<<dimGrid,dimBlock>>>(m, n, k, d_A, d_B, d_C);
+    matmult5<<<dimGrid,dimBlock>>>(m, n, k, d_A, d_B, d_C);
     cudaDeviceSynchronize();
 
     cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
@@ -290,48 +287,46 @@ void matmult_gpu5(int m, int n, int k,double *h_A,double *h_B,double *h_C) {
 
 __global__ void matmult5(int m, int n, int k,double *A,double *B,double *C) {
 
-    int i,j,l,s;
+    int i,j,l;
 
     double Cvalue = 0;
-    double * Csub;
+    double * Asub, *Bsub, *Csub;
 
-    i = blockIdx.y * blockDim.y + threadIdx.y;
-    j = blockIdx.x * blockDim.x + threadIdx.x;
 
-    k_blocked = (k/BLOCK_SIZE)
 
+    i = threadIdx.y;
+    j = threadIdx.x;
+
+    int k_blocked = (k/BLOCK_SIZE);
+
+    //printf("k_blocked %d\n", k_blocked);
     //Get Csub matrix
-    Csub = &A[k*BLOCK_SIZE * j+ BLOCK_SIZE * i]
+    //k is here the A.stride
+    Csub = &C[n*BLOCK_SIZE * blockIdx.y + BLOCK_SIZE * blockIdx.x];
 
-    if (i < m-num_el && j < n) {
       for (l = 0; l<k_blocked; l++) {
-
-
           //Shared memory to store sub-matrices of A and B
           __shared__ double as[BLOCK_SIZE][BLOCK_SIZE];
           __shared__ double bs[BLOCK_SIZE][BLOCK_SIZE];
 
-          as[threadIdx.y][threadIdx.x] = A[i*k + l*BLOCK_SIZE + threadIdx.x];
-          bs[threadIdx.y][threadIdx.x] = B[(l*BLOCK_SIZE+threadIdx.y)*];
+          Asub = &A[k*BLOCK_SIZE * blockIdx.y +
+                    BLOCK_SIZE * l];
+
+          Bsub = &B[n*BLOCK_SIZE * l +
+                    BLOCK_SIZE * blockIdx.x];
+
+          as[threadIdx.y][threadIdx.x] = Asub[k*i + j];
+          bs[threadIdx.y][threadIdx.x] = Bsub[n*i + j];
 
           __syncthreads();
           //Multiply sub matrices
           for(int e = 0; e < BLOCK_SIZE; ++e){
-              Cvalue += as[i][e] * bs[e][l]
+              Cvalue += as[i][e] * bs[e][j];
           }
           __syncthreads();
-
       }
-    } else if (i >= m-num_el && j < n) {
-        for (l = 0; l<k; l++) {
-            for (s = i; s<m; s++) {
-                c(s,j) = c(s,j) + a(s,l) * b(l,j);
-            }
-        }
-    }
-
     //Write back to global memory somehow
-
+    //A.elements[row * A.stride + col] = value
+    Csub[i*n+j] = Cvalue;
 
 }
-*/
