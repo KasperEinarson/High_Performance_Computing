@@ -207,7 +207,7 @@ void matmult_gpu4(int m, int n, int k,double *h_A,double *h_B,double *h_C) {
     cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
 
     dim3 dimBlock(16, 16, 1); // Num threads
-    dim3 dimGrid((ceil((double)n/dimBlock.x)), ceil(((double)m/dimBlock.y) / num_el), 1); // Num blocks
+    dim3 dimGrid((ceil((double)n/dimBlock.x)), ceil(((double)m/dimBlock.y) / 16), 1); // Num blocks
 
     cudaMemset(d_C, 0, size_C);
 
@@ -225,6 +225,8 @@ void matmult_gpu4(int m, int n, int k,double *h_A,double *h_B,double *h_C) {
 __global__ void matmult4(int m, int n, int k,double *A,double *B,double *C) {
 
     int i,j,l,s;
+
+    int num_el = 16;
 
     j = blockIdx.x * blockDim.x + threadIdx.x;
     i = (blockIdx.y * blockDim.y + threadIdx.y) * num_el;
