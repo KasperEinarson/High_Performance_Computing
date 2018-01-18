@@ -4,7 +4,7 @@ OBJS	 = main_gpu.o jacobi_gpu.o
 
 OPT	= -g -O3
 PIC	=
-XOPTS = -Xptxas=-v
+XOPTS = -Xptxas=-v -lineinfo
 ARCH  = -arch=sm_70
 OMP   = -fopenmp
 

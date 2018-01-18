@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
 	    cudaMemcpy(h_U_old, d_U_old, size_double, cudaMemcpyDeviceToHost);
 	    cudaMemcpy(h_fu,    d_fu,    size_int,    cudaMemcpyDeviceToHost);
 
-	    print_matrix(N,N,h_U);
+	    //print_matrix(N,N,h_U);
 
 		cudaFreeHost(h_U);
 		cudaFreeHost(h_U_old);
@@ -153,7 +153,7 @@ int main(int argc, char *argv[]) {
 	    cudaMemcpy(h_U_old, d_U_old, size_double, cudaMemcpyDeviceToHost);
 	    cudaMemcpy(h_fu,    d_fu,    size_int,    cudaMemcpyDeviceToHost);
 
-	    print_matrix(N,N,h_U);
+	    //print_matrix(N,N,h_U);
 
 		cudaFreeHost(h_U);
 		cudaFreeHost(h_U_old);
@@ -210,11 +210,11 @@ int main(int argc, char *argv[]) {
 	    while (k < max_it) {
 
 	    	cudaSetDevice(gpu_0);
-	    	jacobi_3<<<dimGrid,dimBlock>>>(N, d0_U, d0_U_old, d1_U_old, d0_fu, h, delta_sq, gpu_0);
+	    	jacobi_3_0<<<dimGrid,dimBlock>>>(N, d0_U, d0_U_old, d1_U_old, d0_fu, h, delta_sq);
 	    	cudaDeviceSynchronize();
 
 	    	cudaSetDevice(gpu_1);
-	    	jacobi_3<<<dimGrid,dimBlock>>>(N, d1_U, d1_U_old, d0_U_old, d1_fu, h, delta_sq, gpu_1);
+	    	jacobi_3_1<<<dimGrid,dimBlock>>>(N, d1_U, d1_U_old, d0_U_old, d1_fu, h, delta_sq);
 		    cudaDeviceSynchronize();
 
 		    //Swap Pointers	device 0
@@ -237,7 +237,7 @@ int main(int argc, char *argv[]) {
 	    cudaMemcpy(h_U_old + (N*N)/2, d1_U_old, size_double/2.0, cudaMemcpyDeviceToHost);
 	    cudaMemcpy(h_fu + (N*N)/2,    d1_fu,    size_int/2,      cudaMemcpyDeviceToHost);
 
-	    print_matrix(N,N,h_U);
+	    //print_matrix(N,N,h_U);
 
 		cudaFreeHost(h_U);
 		cudaFreeHost(h_U_old);
@@ -248,10 +248,6 @@ int main(int argc, char *argv[]) {
 		cudaFree(d1_U);
 		cudaFree(d1_U_old);
 		cudaFree(d1_fu);
-
-
-
-
 
 	}
 		
