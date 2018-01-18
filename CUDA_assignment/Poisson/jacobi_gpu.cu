@@ -39,14 +39,12 @@ __global__ void jacobi_2(int N, double *U, double *U_old, int *F, double h, doub
 
 }
 
-__global__ void jacobi_3(int N, double *U, double *U_old, double *U_old_e, int *F, double h, double delta_sq, int GPU) {
+__global__ void jacobi_3_0(int N, double *U, double *U_old, double *U_old_e, int *F, double h, double delta_sq) {
 
   int i,j;
 
     j = blockIdx.x * blockDim.x + threadIdx.x + 1;
     i = blockIdx.y * blockDim.y + threadIdx.y + 1;
-
-    if (GPU == 0) {
 
       if(i < (N/2)-1 && j < N-1){
 
@@ -57,27 +55,26 @@ __global__ void jacobi_3(int N, double *U, double *U_old, double *U_old_e, int *
             u(i-1,j) = h * (u_old(i-2,j) + u_old_e(0,j) + u_old(i-1,j-1) + u_old(i-1,j+1) + delta_sq * (double)f(i-1,j));
 
           }
+}
 
-    }
+__global__ void jacobi_3_1(int N, double *U, double *U_old, double *U_old_e, int *F, double h, double delta_sq) {
 
-    if (GPU == 1){
+  int i,j;
+
+    j = blockIdx.x * blockDim.x + threadIdx.x + 1;
+    i = blockIdx.y * blockDim.y + threadIdx.y + 1;
 
       if(i < (N/2)-1 && j < N-1){
 
-          if(i == 1){
-          
-            u(i-1,j) = h * (u_old_e((N/2)-1,j) + u_old(i,j) + u_old(i-1,j-1) + u_old(i-1,j+1) + delta_sq * (double)f(i-1,j));
+        if(i == 1){
+        
+          u(i-1,j) = h * (u_old_e((N/2)-1,j) + u_old(i,j) + u_old(i-1,j-1) + u_old(i-1,j+1) + delta_sq * (double)f(i-1,j));
 
-          }    
+        }    
 
-          u(i,j) = h * (u_old(i-1,j) + u_old(i+1,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j));
-      }
-
+        u(i,j) = h * (u_old(i-1,j) + u_old(i+1,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j));
     }
-
 }
-
-
 
 
   /* int i, j, k = 0;
