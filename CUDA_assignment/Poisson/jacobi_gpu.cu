@@ -48,16 +48,15 @@ __global__ void jacobi_3(int N, double *U, double *U_old, double *U_old_e, int *
 
     if (GPU == 0) {
 
-      if(i < (N/2) && j < N-1){
-
-          if(i == (N/2)){
-
-            u(i,j) = h * (u_old(i-1,j) + u_old_e(0,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j));
-
-          }
+      if(i < (N/2)-1 && j < N-1){
 
           u(i,j) = h * (u_old(i-1,j) + u_old(i+1,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j));
-      }
+          
+      } else if(i == (N/2) && j < N-1){
+
+            u(i-1,j) = h * (u_old(i-2,j) + u_old_e(0,j) + u_old(i-1,j-1) + u_old(i-1,j+1) + delta_sq * (double)f(i-1,j));
+
+          }
 
     }
 
@@ -66,10 +65,10 @@ __global__ void jacobi_3(int N, double *U, double *U_old, double *U_old_e, int *
       if(i < (N/2)-1 && j < N-1){
 
           if(i == 1){
+          
+            u(i-1,j) = h * (u_old_e((N/2)-1,j) + u_old(i,j) + u_old(i-1,j-1) + u_old(i-1,j+1) + delta_sq * (double)f(i-1,j));
 
-            u(i,j) = 10.0; // h * (u_old_e((N/2),j) + u_old(i+1,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j));
-
-          } 
+          }    
 
           u(i,j) = h * (u_old(i-1,j) + u_old(i+1,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j));
       }
@@ -124,11 +123,11 @@ __global__ void jacobi_3(int N, double *U, double *U_old, double *U_old_e, int *
     // Update U
     for (i=1; i<N-1; i++) {
       for (j=1; j<N-1; j++) {
-        u(i,j) = h * (u_old(i-1,j) + u_old(i+1,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j));	
+        u(i,j) = h * (u_old(i-1,j) + u_old(i+1,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j)); 
       }
     }
    
-    //Swap Pointers	
+    //Swap Pointers 
     tmp = U;
     U = U_old;
     U_old = tmp;
