@@ -5,6 +5,7 @@
 
 #define u(i,j) U[(i)*N + (j)]
 #define u_old(i,j) U_old[(i)*N + (j)]
+#define u_old_e(i,j) U_old_e[(i)*N + (j)]
 #define f(i,j) F[(i)*N + (j)]
 
 
@@ -37,6 +38,48 @@ __global__ void jacobi_2(int N, double *U, double *U_old, int *F, double h, doub
     //Swap Pointers 
 
 }
+
+__global__ void jacobi_3(int N, double *U, double *U_old, double *U_old_e, int *F, double h, double delta_sq, int GPU) {
+
+  int i,j;
+
+    j = blockIdx.x * blockDim.x + threadIdx.x + 1;
+    i = blockIdx.y * blockDim.y + threadIdx.y + 1;
+
+    if (GPU == 0) {
+
+      if(i < (N/2) && j < N-1){
+
+          if(i == (N/2)){
+
+            u(i,j) = h * (u_old(i-1,j) + u_old_e(0,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j));
+
+          }
+
+          u(i,j) = h * (u_old(i-1,j) + u_old(i+1,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j));
+      }
+
+    }
+
+    if (GPU == 1){
+
+      if(i < (N/2)-1 && j < N-1){
+
+          if(i == 1){
+
+            u(i,j) = 10.0; // h * (u_old_e((N/2),j) + u_old(i+1,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j));
+
+          } 
+
+          u(i,j) = h * (u_old(i-1,j) + u_old(i+1,j) + u_old(i,j-1) + u_old(i,j+1) + delta_sq * (double)f(i,j));
+      }
+
+    }
+
+}
+
+
+
 
   /* int i, j, k = 0;
   double h = 1.0 / 4.0;
