@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
 	    int *d0_fu, *d1_fu;
 
 	    dim3 dimBlock(16, 16, 1); // Num threads
-	    dim3 dimGrid(ceil((double)N/dimBlock.x), ceil((N/2)/dimBlock.y), 1); // Num blocks
+	    dim3 dimGrid(ceil((double)N/dimBlock.x), ceil(((double)N/2.0)/dimBlock.y), 1); // Num blocks
 
 
 	    // Device 0
