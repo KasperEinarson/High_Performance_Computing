@@ -16,7 +16,7 @@ void matmult_gpu4(int m, int n, int k,double *h_A,double *h_B,double *h_C);
 __global__ void matmult1(int m, int n, int k,double *A,double *B,double *C);
 __global__ void matmult2(int m, int n, int k,double *A,double *B,double *C);
 __global__ void matmult3(int m, int n, int k,double *A,double *B,double *C);
-__global__ void matmult4(int m, int n, int k,double *A,double *B,double *C, int num_el);
+__global__ void matmult4(int m, int n, int k,double *A,double *B,double *C);
 
 void matmult_gpu1(int m, int n, int k,double *h_A,double *h_B,double *h_C) {
 
@@ -184,8 +184,6 @@ void matmult_gpu4(int m, int n, int k,double *h_A,double *h_B,double *h_C) {
     int size_B = k * n * sizeof(double);
     int size_C = m * n * sizeof(double);
 
-    int num_el = 8;
-
     cudaMalloc((void **)&d_A, size_A);
     cudaMalloc((void **)&d_B, size_B);
     cudaMalloc((void **)&d_C, size_C);
@@ -194,11 +192,11 @@ void matmult_gpu4(int m, int n, int k,double *h_A,double *h_B,double *h_C) {
     cudaMemcpy(d_B, h_B, size_B, cudaMemcpyHostToDevice);
 
     dim3 dimBlock(16, 16, 1); // Num threads
-    dim3 dimGrid((ceil((double)n/dimBlock.x)), ceil(((double)m/dimBlock.y) / num_el), 1); // Num blocks
+    dim3 dimGrid((ceil((double)n/dimBlock.x)), ceil(((double)m/dimBlock.y) / 16), 1); // Num blocks
 
     cudaMemset(d_C, 0, size_C);
 
-    matmult4<<<dimGrid,dimBlock>>>(m, n, k, d_A, d_B, d_C, num_el);
+    matmult4<<<dimGrid,dimBlock>>>(m, n, k, d_A, d_B, d_C);
     cudaDeviceSynchronize();
 
     cudaMemcpy(h_C, d_C, size_C, cudaMemcpyDeviceToHost);
@@ -209,9 +207,11 @@ void matmult_gpu4(int m, int n, int k,double *h_A,double *h_B,double *h_C) {
 
 }
 
-__global__ void matmult4(int m, int n, int k,double *A,double *B,double *C, int num_el) {
+__global__ void matmult4(int m, int n, int k,double *A,double *B,double *C) {
 
     int i,j,l,s;
+
+    int num_el = 16;
 
     j = blockIdx.x * blockDim.x + threadIdx.x;
     i = (blockIdx.y * blockDim.y + threadIdx.y) * num_el;
@@ -226,6 +226,14 @@ __global__ void matmult4(int m, int n, int k,double *A,double *B,double *C, int 
           c(i+5,j) = c(i+5,j) + a(i+5,l) * b(l,j);
           c(i+6,j) = c(i+6,j) + a(i+6,l) * b(l,j);
           c(i+7,j) = c(i+7,j) + a(i+7,l) * b(l,j);
+          c(i+8,j) = c(i+8,j) + a(i+8,l) * b(l,j);
+          c(i+9,j) = c(i+9,j) + a(i+9,l) * b(l,j);
+          c(i+10,j) = c(i+10,j) + a(i+10,l) * b(l,j);
+          c(i+11,j) = c(i+11,j) + a(i+11,l) * b(l,j);
+          c(i+12,j) = c(i+12,j) + a(i+12,l) * b(l,j);
+          c(i+13,j) = c(i+13,j) + a(i+13,l) * b(l,j);
+          c(i+14,j) = c(i+14,j) + a(i+14,l) * b(l,j);
+          c(i+15,j) = c(i+15,j) + a(i+15,l) * b(l,j);
       }
     } else if (i >= m-num_el && j < n) {
         for (l = 0; l<k; l++) {
